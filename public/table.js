@@ -27,6 +27,20 @@ const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
 planeMesh.rotation.x = -Math.PI / 2;
 scene.add(planeMesh);
 
+const barrierShape = new CANNON.Box(new CANNON.Vec3(5, 1, 0.1)); // Adjust size as needed
+const barrierBody = new CANNON.Body({
+    mass: 0, // Static body
+    position: new CANNON.Vec3(0, 0, -5) // Position at one edge of the plane
+});
+barrierBody.addShape(barrierShape);
+world.addBody(barrierBody);
+const barrierGeometry = new THREE.BoxGeometry(10, 2, 0.2); // Match Cannon.js dimensions
+const barrierMaterial = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
+const barrierMesh = new THREE.Mesh(barrierGeometry, barrierMaterial);
+barrierMesh.position.set(0, 0, -5); // Position to match the Cannon.js body
+scene.add(barrierMesh);
+
+
 // Create a cube
 const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1)); // Example for a cube
 const body = new CANNON.Body({
