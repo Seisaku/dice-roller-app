@@ -5,23 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Startup site",
-            "program": "${workspaceFolder}/index.js",
+            "name": "Startup site with Nodemon",
+            "type": "node",
             "request": "launch",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
+            "runtimeExecutable": "nodemon",
+            "program": "${workspaceFolder}/index.js",
+            "restart": true,
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"],
+            "internalConsoleOptions": "neverOpen"
         },
-        // {
-        //     "type": "node",
-        //     "request": "launch",
-        //     "name": "Launch Program",
-        //     "skipFiles": [
-        //         "<node_internals>/**"
-        //     ],
-        //     "program": "${workspaceFolder}\\index.test.js"
-        // },
         {
             "type": "node",
             "request": "launch",

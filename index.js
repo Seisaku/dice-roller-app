@@ -13,3 +13,7 @@ const port = 3000;
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+app.use(express.static('public'));
+app.use('/dist', express.static('dist'));
+

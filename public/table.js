@@ -1,6 +1,8 @@
 // JavaScript code to initialize Three.js will go here
-import * as THREE from 'https://unpkg.com/three/build/three.module.js';
-import * as CANNON from 'https://unpkg.com/cannon-es/dist/cannon-es.js';
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
 
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0); // Gravity along the negative Z-axis
@@ -13,6 +15,10 @@ camera.lookAt(scene.position); // Ensure the camera is pointing towards the scen
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05; // Adjust damping factor as needed
 
 // Create a plane
 const groundShape = new CANNON.Plane();
@@ -71,6 +77,8 @@ function onSceneClick() {
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
+
+    controls.update(); // Only required if controls.enableDamping is set to true
 
     // Update physics world
     world.step(1 / 60);
