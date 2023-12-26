@@ -1,6 +1,6 @@
 // Description: Test cases for index.js
 
-const { roll, rollParse } = require('./index.js');
+import { roll, rollParse } from './diceRoller.js';
 
 // Test case 5: Rolling 5 dices with 0 faces
 test('roll 5 dices with 0 faces', () => {
