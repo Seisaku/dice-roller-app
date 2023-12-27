@@ -10,6 +10,7 @@
             "request": "launch",
             "runtimeExecutable": "nodemon",
             "program": "${workspaceFolder}/index.js",
+            "preLaunchTask": "webpack watch",
             "restart": true,
             "console": "integratedTerminal",
             "skipFiles": ["<node_internals>/**"],

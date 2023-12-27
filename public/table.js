@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0); // Gravity along the negative Z-axis
 
@@ -27,13 +26,19 @@ groundBody.addShape(groundShape);
 groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); // Rotate the plane to be horizontal
 world.addBody(groundBody);
 
-const planeGeometry = new THREE.PlaneGeometry(10, 10);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x777777, side: THREE.DoubleSide });
-const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-planeMesh.rotation.x = -Math.PI / 2;
-scene.add(planeMesh);
+// const planeGeometry = new THREE.PlaneGeometry(30, 30);
+// const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x777777, side: THREE.DoubleSide });
+// const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+// planeMesh.rotation.x = -Math.PI / 2;
+// scene.add(planeMesh);
 
-const barrierShape = new CANNON.Box(new CANNON.Vec3(5, 1, 0.1)); // Adjust size as needed
+const groundDebugGeometry = new THREE.BoxGeometry(30, 0.1, 30);
+const groundDebugMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
+const groundDebugMesh = new THREE.Mesh(groundDebugGeometry, groundDebugMaterial);
+groundDebugMesh.position.y = -0.05; // Half the height of the box to align with plane
+scene.add(groundDebugMesh);
+
+const barrierShape = new CANNON.Box(new CANNON.Vec3(15, 1, 0.1)); // Adjust size as needed
 const barrierBody = new CANNON.Body({
     mass: 0, // Static body
     position: new CANNON.Vec3(0, 0, -5) // Position at one edge of the plane
@@ -43,7 +48,10 @@ world.addBody(barrierBody);
 const barrierGeometry = new THREE.BoxGeometry(10, 2, 0.2); // Match Cannon.js dimensions
 const barrierMaterial = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
 const barrierMesh = new THREE.Mesh(barrierGeometry, barrierMaterial);
-barrierMesh.position.set(0, 0, -5); // Position to match the Cannon.js body
+
+barrierMesh.quaternion.copy(barrierBody.quaternion); // Copy the rotation of the Cannon.js body
+barrierMesh.position.copy(barrierBody.position); // Copy the position of the Cannon.js body
+
 scene.add(barrierMesh);
 
 
@@ -53,13 +61,14 @@ const body = new CANNON.Body({
     mass: 1,
     shape: shape
 });
+
 body.position.set(0, 5, 0); // Start at 1 unit above the ground plane
 body.velocity.set(1, 1, 1); // Forward and upward motion
 body.angularVelocity.set(3, -3, 3); // Spinning around Y and Z axes
 world.addBody(body);
 
 // Add a cube
-const geometry = new THREE.BoxGeometry();
+const geometry = new THREE.BoxGeometry(2, 2, 2);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
 cube.position.copy(body.position);
@@ -71,6 +80,8 @@ function onSceneClick() {
     body.position.set(0, 5, 0); // Start at 1 unit above the ground plane
     body.velocity.set(1, 1, 1); // Forward and upward motion
     body.angularVelocity.set(3, -3, 3); // Spinning around Y and Z axes
+
+    console.log('TEST');
 }
 
 
@@ -89,7 +100,7 @@ function animate() {
 
     // Update the text content with cube's current position
     const pos = cube.position;
-    document.getElementById('cubeInfo').textContent = `Cube Position: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
+    document.getElementById('cubeInfo').textContent = `Cube: x=${pos.x.toFixed(2)}, y=${pos.y.toFixed(2)}, z=${pos.z.toFixed(2)}`;
 
     // Render the scene
     renderer.render(scene, camera);
