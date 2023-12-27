@@ -38,22 +38,35 @@ const groundDebugMesh = new THREE.Mesh(groundDebugGeometry, groundDebugMaterial)
 groundDebugMesh.position.y = -0.05; // Half the height of the box to align with plane
 scene.add(groundDebugMesh);
 
-const barrierShape = new CANNON.Box(new CANNON.Vec3(15, 1, 0.1)); // Adjust size as needed
+const barrierShape = new CANNON.Box(new CANNON.Vec3(30, 2, 0.2)); // Adjust size as needed
 const barrierBody = new CANNON.Body({
     mass: 0, // Static body
-    position: new CANNON.Vec3(0, 0, -5) // Position at one edge of the plane
+    position: new CANNON.Vec3(0, 1, -15) // Position at one edge of the plane
 });
 barrierBody.addShape(barrierShape);
 world.addBody(barrierBody);
-const barrierGeometry = new THREE.BoxGeometry(10, 2, 0.2); // Match Cannon.js dimensions
-const barrierMaterial = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
+const barrierGeometry = new THREE.BoxGeometry(30, 2, 0.2); // Match Cannon.js dimensions
+const barrierMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.5 });
 const barrierMesh = new THREE.Mesh(barrierGeometry, barrierMaterial);
-
 barrierMesh.quaternion.copy(barrierBody.quaternion); // Copy the rotation of the Cannon.js body
 barrierMesh.position.copy(barrierBody.position); // Copy the position of the Cannon.js body
-
 scene.add(barrierMesh);
 
+// Barrier 2 - Opposite side
+const barrierMesh2 = new THREE.Mesh(barrierGeometry, barrierMaterial);
+barrierMesh2.position.set(0, 1, 15);
+scene.add(barrierMesh2);
+
+// Barrier 3 - Perpendicular side
+const barrierGeometry3 = new THREE.BoxGeometry(0.2, 2, 30); // Adjust dimensions
+const barrierMesh3 = new THREE.Mesh(barrierGeometry3, barrierMaterial);
+barrierMesh3.position.set(15, 1, 0);
+scene.add(barrierMesh3);
+
+// Barrier 4 - Opposite perpendicular side
+const barrierMesh4 = new THREE.Mesh(barrierGeometry3, barrierMaterial);
+barrierMesh4.position.set(-15, 1, 0);
+scene.add(barrierMesh4);
 
 // Create a cube
 const shape = new CANNON.Box(new CANNON.Vec3(1, 1, 1)); // Example for a cube
@@ -62,7 +75,7 @@ const body = new CANNON.Body({
     shape: shape
 });
 
-body.position.set(0, 5, 0); // Start at 1 unit above the ground plane
+body.position.set(0, 25, 0); // Start at 1 unit above the ground plane
 body.velocity.set(1, 1, 1); // Forward and upward motion
 body.angularVelocity.set(3, -3, 3); // Spinning around Y and Z axes
 world.addBody(body);
@@ -77,11 +90,9 @@ scene.add(cube);
 
 renderer.domElement.addEventListener('click', onSceneClick);
 function onSceneClick() {
-    body.position.set(0, 5, 0); // Start at 1 unit above the ground plane
+    body.position.set(0, 25, 0); // Start at 1 unit above the ground plane
     body.velocity.set(1, 1, 1); // Forward and upward motion
     body.angularVelocity.set(3, -3, 3); // Spinning around Y and Z axes
-
-    console.log('TEST');
 }
 
 
