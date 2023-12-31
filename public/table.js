@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0); // Gravity along the negative Z-axis
@@ -137,6 +138,42 @@ function updateRayLine(origin, direction) {
 // Call this function inside your raycasting logic
 // For example: updateRayLine(raycaster.ray.origin, raycaster.ray.direction);
 
+// Assuming controls is your instance of THREE.OrbitControls
+const dragControls = new DragControls([cube], camera, renderer.domElement);
+
+// Create an invisible mesh for dragging
+let dragCube = new THREE.Mesh(cube.geometry, cube.material);
+dragCube.visible = false;
+scene.add(dragCube);
+
+console.log('DragControls enabled:', dragControls.enabled);
+console.log('DragControls objects:', dragControls.objects);
+
+dragControls.addEventListener('drag', function (event) {
+    console.log('drag event fired');
+    console.log('cube position before:', cube.position);
+
+    // Update the body's position to match the cube's position
+    body.position.copy(event.object.position);
+
+    console.log('cube position after:', cube.position);
+});
+
+let isDragging = false;
+
+dragControls.addEventListener('dragstart', function (event) {
+    isDragging = true;
+    // Set the body to kinematic to disable physics
+    body.type = CANNON.Body.KINEMATIC;
+});
+
+dragControls.addEventListener('dragend', function (event) {
+    isDragging = false;
+    // Set the body back to dynamic to enable physics after a delay
+    setTimeout(function() {
+        body.type = CANNON.Body.DYNAMIC;
+    }, 100); // Delay in milliseconds
+});
 
 function onMouseDown(event) {
     event.preventDefault();
@@ -159,19 +196,23 @@ function onMouseDown(event) {
 
     // Now, 'meshes' is an array of all Mesh objects in the scene
     const intersectsTest = raycaster.intersectObjects(meshes); // Replace with your array of objects
-    let meshIntersects=intersectsTest.map(intersect => intersect.object.name);
+    let meshIntersects = intersectsTest.map(intersect => intersect.object.name);
     document.getElementById('raycasterInfo').textContent = `Raycaster: x=${raycaster.ray.direction.x.toFixed(2)}, y=${raycaster.ray.direction.y.toFixed(2)}, z=${raycaster.ray.direction.z.toFixed(2)} [${meshIntersects}]`;
 
     if (intersects.length > 0) {
         // Mouse is over the dice
         // Handle dice dragging logic
         document.getElementById('mouseInfo').textContent = `Mouse: x=${mouse.x.toFixed(2)}, y=${mouse.y.toFixed(2)} (over dice)`;
+        // Disable OrbitControls
+        controls.enabled = false;
     } else {
         document.getElementById('mouseInfo').textContent = `Mouse: x=${mouse.x.toFixed(2)}, y=${mouse.y.toFixed(2)} (camera)`;
-        // Mouse is not over the dice
-        // Allow OrbitControls to handle the event
+        // Enable OrbitControls
+        controls.enabled = true;
     }
 }
+
+
 
 function onMouseMove(event) {
     event.preventDefault();
@@ -191,14 +232,14 @@ function onMouseMove(event) {
 
     // Now, 'meshes' is an array of all Mesh objects in the scene
     const intersectsTest = raycaster.intersectObjects(meshes); // Replace with your array of objects
-    let meshIntersects=intersectsTest.map(intersect => intersect.object.name);
+    let meshIntersects = intersectsTest.map(intersect => intersect.object.name);
     document.getElementById('raycasterInfo').textContent = `Raycaster: x=${raycaster.ray.direction.x.toFixed(2)}, y=${raycaster.ray.direction.y.toFixed(2)}, z=${raycaster.ray.direction.z.toFixed(2)} [${meshIntersects}]`;
 
     if (intersects.length > 0) {
         // Mouse is over the dice
         // Handle dice dragging logic        
         cube.material.color.set(0xff0000);
-    } else {    
+    } else {
         cube.material.color.set(0x00ff00);
         // Mouse is not over the dice
         // Allow OrbitControls to handle the event
@@ -206,7 +247,11 @@ function onMouseMove(event) {
 }
 
 function onMouseUp(event) {
+    // Enable OrbitControls
+    controls.enabled = true;
 
+    // Enable physics for the cube
+    body.type = CANNON.Body.DYNAMIC;
 }
 
 // Create an empty array to store the meshes
@@ -220,7 +265,7 @@ scene.traverse(function (node) {
     }
 });
 
-window.addEventListener('keydown', function(event) {
+window.addEventListener('keydown', function (event) {
     // Check if the 'r' key was pressed
     if (event.key === 'r') {
         // Set the camera position to be above the cube
@@ -242,8 +287,10 @@ function animate() {
     world.step(1 / 60);
 
     // Synchronize Three.js object with Cannon.js body
-    cube.position.copy(body.position);
-    cube.quaternion.copy(body.quaternion);
+    if (isDragging === false) {
+        cube.position.copy(body.position);
+        cube.quaternion.copy(body.quaternion);
+    }
 
     // Update the text content with cube's current position
     const pos = cube.position;
